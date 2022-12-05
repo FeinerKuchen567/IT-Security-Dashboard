@@ -1,0 +1,65 @@
+version: "3"
+
+networks:
+  grafana:
+    driver: bridge
+services:
+  loki:
+    image: grafana/loki:2.6.1
+    volumes:
+      - /home/ubuntu/dashboard/loki:/etc/loki
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yml
+    networks:
+      - grafana
+  promtail:
+    image: grafana/promtail:2.6.1
+    volumes:
+      - /var/log:/var/log
+      - /home/ubuntu/dashboard/promtail:/etc/promtail
+    # ports:
+    #   - "1514:1514" # this is only needed if you are going to send syslogs
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/promtail-config.yml
+    networks:
+      - grafana
+  grafana:
+    image: grafana/grafana-enterprise
+    user: "1000"
+    volumes:
+    - /home/ubuntu/dashboard/grafana:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - grafana
+  prometheus:
+    image: prom/prometheus:v2.36.2
+    user: "1000"
+    volumes:
+    - /home/ubuntu/dashboard/prometheus:/etc/prometheus/
+    - /home/ubuntu/dashboard/prometheus/prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    links:
+      - scan-exporter:scan-exporter
+    networks:
+      - grafana
+    restart: unless-stopped
+  scan-exporter:
+    image: devopsworks/scan-exporter
+    volumes:
+    - /home/ubuntu/dashboard/scan_exporter:/etc/scan-exporter
+    command: -config /etc/scan-exporter/config.yml
+    ports:
+      - 2112:2112
+    networks:
+      - grafana
+    restart: unless-stopped

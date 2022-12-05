@@ -1,0 +1,61 @@
+
+# Hold the timeout, in seconds, that will be used all over the program (i.e for scans).
+timeout: 2
+
+# Hold the number of files that can be simultaneously opened on the host.
+# It will be the number of scan goroutines. We recommand 1024 or 2048, but it depends
+# on the `ulimit` of the host.
+limit: 1024
+
+# The log level that will be used all over the program. Supported values:
+# trace, debug, info, warn, error, fatal
+log_level: "info"
+
+# This field is used to rate limit the queries for all the targets. If it is not
+# set, no rate limiting will occur. It will also be overwritten by the
+# target-specific value.
+queries_per_sec: 1000
+
+# Hold the global TCP period value. It will be the default if none has been set
+# inside the target-specific configuration.
+tcp_period: 6h
+
+# Hold the global ICMP period value. It will be the default if none has been set
+# inside the target-specific configuration.
+icmp_period: 30s
+
+# Configure targets.
+targets:
+    # Name of the target.
+    # It can be whatever you want.
+  - name: "Google DNS"
+
+    # IP address of the target.
+    # Only IPv4 addresses are supported.
+    ip: "8.8.8.8"
+
+    # Apply a rate limit for a specific target. This value will overwrite the one set
+    # globally if it exists.
+    queries_per_sec: 900
+
+    # TCP scan parameters.
+    tcp:
+      # TCP scan frequency. Supported values:
+      # {1..9999}{s,m,h,d}
+      # For example, all those values are working and reprensent a frenquecy of
+      # one hour: 3600s, 60m, 1h.
+      period: 12h
+
+      # Range of ports to scan. Supported values:
+      # all, reserved, 22, 100-1000, 11,12-14,15...
+      range: "reserved"
+
+      # Ports that are expected to be open. Supported values are the same than
+      # for range.
+      expected: "53,443,853"
+
+    # ICMP scan parameters
+    icmp:
+      # Ping frequency. Supported values are the same than for TCP's period. To
+      # disable ICMP requests for a specific target, use 0.
+      period: 1h
