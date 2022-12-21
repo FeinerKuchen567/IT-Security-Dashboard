@@ -18,8 +18,10 @@ services:
     image: grafana/promtail:2.6.1
     volumes:
       - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers
       - /home/ubuntu/dashboard/promtail:/etc/promtail
-    # ports:
+    ports:
+      - "9080:9080"
     #   - "1514:1514" # this is only needed if you are going to send syslogs
     restart: unless-stopped
     command: -config.file=/etc/promtail/promtail-config.yml
